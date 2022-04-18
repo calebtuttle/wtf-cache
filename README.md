@@ -23,6 +23,6 @@ Install dependencies.
 
     npm install
 
-Run server with:
+Start server on http://localhost:3000
 
-    npm run test
+    npm run start
