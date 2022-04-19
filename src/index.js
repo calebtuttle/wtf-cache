@@ -8,7 +8,7 @@ const app = express()
 app.use(cors())
 
 var corsOptions = {
-  origin: 'http://localhost:3002',
+  origin: ['https://www.whoisthis.wtf', 'http://localhost:3002'],
   optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
 }
 
