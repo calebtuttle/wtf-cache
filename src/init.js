@@ -4,7 +4,7 @@ require('dotenv').config();
 
 const cache = new NodeCache()
 // wtf.setProviderURL({ 'polygon' : process.env.MORALIS_NODE })
-wtf.setProviderURL({ 'polygon' : 'https://rpc-mumbai.maticvigil.com' })
+wtf.setProviderURL({ 'gnosis' : 'https://rpc.gnosischain.com/' })
 
 module.exports = {
   cache: cache,
