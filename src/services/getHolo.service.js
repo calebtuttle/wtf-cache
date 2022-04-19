@@ -15,7 +15,7 @@ module.exports = {
     }
     console.log('no holo in cache. Retrieving it from wtf-lib')
     userHolo = await wtf.getHolo(req.query.address)
-    let success = cache.set(`holo${req.query.address}`, userHolo, 300) // 300s == delete from cache after 5 minutes
+    let success = cache.set(`holo${req.query.address}`, userHolo, 60) // 60s == delete from cache after 1 minute1
     return res.status(200).json({ holo: userHolo })
   }
 }

@@ -8,7 +8,7 @@ const getAllUserAddrs = async () => {
     return allAddrs
   }
   allAddrs = await wtf.getAllUserAddresses()
-  let success = cache.set('allUserAddresses', allAddrs, 300) // 300s == delete from cache after 5 minutes
+  let success = cache.set('allUserAddresses', allAddrs, 300) // 60s == delete from cache after 1 minute
   return allAddrs
 }
 

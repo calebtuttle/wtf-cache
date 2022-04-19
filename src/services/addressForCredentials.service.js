@@ -14,7 +14,7 @@ module.exports = {
     }
     console.log('addressForCredentials: no creds in cache. retrieving it from wtf-lib')
     address = await wtf.addressForCredentials(req.query.credentials, req.query.service)
-    let success = cache.set(`creds${req.query.credentials}${req.query.service}`, address, 300) // 300s == delete from cache after 5 minutes
+    let success = cache.set(`creds${req.query.credentials}${req.query.service}`, address, 60) // 60s == delete from cache after 1 minute
     return res.status(200).json({ address: address })
   }
 }
