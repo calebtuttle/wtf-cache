@@ -10,11 +10,11 @@ module.exports = {
     let address = cache.get(`creds${req.query.credentials}${req.query.service}`)
     if (address) {
       console.log('addressForCredentials: got creds from cache. returning it now')
-      return res.status(200).json({ address: address })
+      return res.status(200).json(address)
     }
     console.log('addressForCredentials: no creds in cache. retrieving it from wtf-lib')
     address = await wtf.addressForCredentials(req.query.credentials, req.query.service)
     let success = cache.set(`creds${req.query.credentials}${req.query.service}`, address, 60) // 60s == delete from cache after 1 minute
-    return res.status(200).json({ address: address })
+    return res.status(200).json(address)
   }
 }

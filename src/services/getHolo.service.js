@@ -11,11 +11,11 @@ module.exports = {
     console.log('got holo from cache')
     if (userHolo) {
       console.log('got holo from cache. returning it now')
-      return res.status(200).json({ holo: userHolo })
+      return res.status(200).json(holo)
     }
     console.log('no holo in cache. Retrieving it from wtf-lib')
     userHolo = await wtf.getHolo(req.query.address)
     let success = cache.set(`holo${req.query.address}`, userHolo, 60) // 60s == delete from cache after 1 minute
-    return res.status(200).json({ holo: userHolo })
+    return res.status(200).json(holo)
   }
 }

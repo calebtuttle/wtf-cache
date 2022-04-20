@@ -15,6 +15,6 @@ const getAllUserAddrs = async () => {
 module.exports = {
   getAllUserAddresses: async (req, res) => {
     const allAddrs = await getAllUserAddrs()
-    return res.status(200).json({ allAddrs: allAddrs })
+    return res.status(200).json(allAddrs)
   }
 }
