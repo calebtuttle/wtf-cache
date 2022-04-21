@@ -3,6 +3,7 @@ const router = express.Router()
 
 const addressForCredentials = require('../services/addressForCredentials.service')
 
-router.get('/', addressForCredentials.addressForCredentials)
+router.get('/', addressForCredentials.getAddressForCredentials)
+router.post('/', addressForCredentials.setAddressForCredentials)
 
 module.exports = router
