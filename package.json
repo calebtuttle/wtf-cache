@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "npx mocha",
-    "start": "node src/server.js"
+    "test": "bash test/runServerAndTests.sh",
+    "start": "bash src/server.sh"
   },
   "author": "",
   "license": "ISC",

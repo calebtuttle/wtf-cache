@@ -1,0 +1,6 @@
+.env
+.vscode
+.nvmrc
+node_modules
+mocharc.json
+**/[Tt]est*

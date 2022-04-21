@@ -1,14 +1,16 @@
 const express = require('express')
-const { cache, wtf } = require('../init')
+const { db, wtf } = require('../init')
+const dbWrapper = require('../utils/dbWrapper')
 
 
 const getAllUserAddrs = async () => {
-  let allAddrs = cache.get('allUserAddresses')
+  console.log('getAllUserAddresses: Entered')
+  let allUsers = await dbWrapper.getAllUsers()
+  let allAddrs = allUsers.map(user => user['address'])
   if (allAddrs) {
     return allAddrs
   }
   allAddrs = await wtf.getAllUserAddresses()
-  let success = cache.set('allUserAddresses', allAddrs, 300) // 60s == delete from cache after 1 minute
   return allAddrs
 }
 
