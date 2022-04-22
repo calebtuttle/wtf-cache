@@ -7,12 +7,6 @@ const axios = require('axios');
 const dbWrapper = require('../src/utils/dbWrapper');
 const { wtf } = require('../src/init');
 
-/**
- * TODO: Test
- * - The helper functions in dbWrapper.
- * - That cache-updater hears all events emitted.
- * - That cach-updater correctly updates the database.
- */
 
 describe('cache-server', function () {
 
@@ -54,20 +48,13 @@ describe('cache-server', function () {
   })
 })
 
-// NOTE: cache-updater doesn't seem to be working. Events seem to never be heard.
-// TODO: Don't use events. Just check the blockchain and update the cache at regular intervals.
 describe('cache-updater', function () {
   this.timeout(15 * 1000);
 
   before(async function () {
     const provider = new ethers.providers.JsonRpcProvider("http://localhost:8545");
-    // const privateKey = '0x3a73865117f803f861db17ef7fe3381c0a1a809c11e74fdeac4f72ac5536b0fe';
     const privateKey = '0xf214f2b2cd398c806f84e317254e0f0b801d0643303237d97a22a48e01628897'
     this.wallet = new ethers.Wallet(privateKey, provider);
-    // const walletTemp = new ethers.Wallet.createRandom()
-    // this.wallet = new ethers.Wallet(walletTemp._signingKey().privateKey, provider)
-    await hre.network.provider.send("hardhat_setBalance", [this.wallet.address, "0x10000000000000000000000",]);
-    console.log(ethers.utils.formatEther(await this.wallet.getBalance()))
   })
   
   // TODO...
@@ -88,14 +75,13 @@ describe('cache-updater', function () {
         'nanaknihal@gmail.com',
         null, null, null
       ]
-      console.log('INSERTING')
       dbWrapper.runSql(`INSERT INTO users ${columns} VALUES (?, ?, ?, ?, ?, ?, ?, ?)`, params)
       userBefore = await dbWrapper.getUserByAddress(userAddress)
     }
     const nameBefore = userBefore['name']
     const bioBefore = userBefore['bio']
 
-    console.log(`User ${userAddress} is submitting a transaction to update their name and bio`)
+    console.log(`test.js: User ${userAddress} is submitting a transaction to update their name and bio`)
     const wtfBiosAddress = wtf.getContractAddresses()['WTFBios']['ethereum']
     const wtfBiosABI = require('./utils/contracts/abi/WTFBios.json')
     const wtfBiosWithSigner = new ethers.Contract(wtfBiosAddress, wtfBiosABI, this.wallet)
@@ -104,7 +90,7 @@ describe('cache-updater', function () {
     const newBio = createHmac('sha256', 'bananas').update(bioBefore).digest('hex');
     let tx = await wtfBiosWithSigner.setNameAndBio(newName, newBio)
     await tx.wait()
-    console.log(`User ${userAddress} successfully updated their name and bio. ` 
+    console.log(`test.js: User ${userAddress} successfully updated their name and bio. ` 
                 + `Waiting for cache-updater to update db.`)
 
     // The value of wait() must be longer than the wait interval in cache-updater for the test to succeeed

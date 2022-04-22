@@ -17,9 +17,7 @@ run_cache_updater &
 cache_updater_pid=$!;
 run_tests;
 tests_pid=$!;
-echo 'Tests finished'
 
-echo 'Terminating cache-server, cache-updater, and hardhat node'
 kill -9 $cache_server_pid;
 kill -9 $cache_updater_pid;
 kill -9 $hardhat_node_pid;
