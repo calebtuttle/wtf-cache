@@ -1,130 +1,82 @@
 /**
- * This script runs alongside cache-server, listening to events on the blockchain and
- * sending POST requests to cache-server to update the its cache.
+ * This script runs alongside cache-server. It queries all WTF 
+ * contracts at regular intervals and updates the local database 
+ * with the up-to-date user holos.
  */
 
-// const sqlite3 = require('sqlite3').verbose();
 const ethers = require('ethers')
 const { db, wtf } = require('./init')
 const dbWrapper = require('./utils/dbWrapper')
 
-const wtfBiosAddress = process.env.WTF_USE_TEST_CONTRACT_ADDRESSES == "true"
-                       ? wtf.getContractAddresses()['WTFBios']['ethereum']
-                       : wtf.getContractAddresses()['WTFBios']['gnosis']
-const vjwtAddresses = process.env.WTF_USE_TEST_CONTRACT_ADDRESSES == "true"
-                      ? wtf.getContractAddresses()['VerifyJWT']['ethereum']
-                      : wtf.getContractAddresses()['VerifyJWT']['gnosis']
+const chain = process.env.WTF_USE_TEST_CONTRACT_ADDRESSES == "true" ? 'ethereum' : 'gnosis'
+const wtfBiosAddress = wtf.getContractAddresses()['WTFBios'][chain]
+const vjwtAddresses = wtf.getContractAddresses()['VerifyJWT'][chain]
 const providerURL = process.env.WTF_USE_TEST_CONTRACT_ADDRESSES == "true"
-                    ? 'https://localhost:8545'
+                    ? 'http://localhost:8545'
                     : 'https://rpc.gnosischain.com/'
 const provider = new ethers.providers.JsonRpcProvider(providerURL)
 
 /**
- * Add event listeners to the WTFBios contract.
+ * @param {ethers.Contract} contract A contract (VerifyJWT or WTFBios) instantiated with a provider.
  */
-const listenToWTFBios = () => {
-  console.log('Listening for events from WTFBios')
-  const wtfBiosABI = wtf.getContractABIs()['WTFBios']
-  const wtfBiosWithProvider = new ethers.Contract(wtfBiosAddress, wtfBiosABI, provider)
-
-  // Update user name/bio in db when SetUserNameAndBio events are emitted
-  wtfBiosWithProvider.on("SetUserNameAndBio", async (address) => {
-    console.log(`Event listener heard event SetUserNameAndBio for address ${address}`)
+const updateDbEntriesForUsersInContract = async (contract) => {
+  const allAddrsInContract = await contract.getRegisteredAddresses()
+  for (let address of allAddrsInContract) {
     address = address.toLowerCase()
-    const newName = await wtf.nameForAddress(address);
-    const newBio = await wtf.bioForAddress(address);
+    const newHolo = await wtf.getHolo(address)
+    const params = [
+      newHolo[chain]['name'],
+      newHolo[chain]['bio'],
+      newHolo[chain]['creds']['orcid'],
+      newHolo[chain]['creds']['google'],
+      newHolo[chain]['creds']['github'],
+      newHolo[chain]['creds']['twitter'],
+      newHolo[chain]['creds']['discord']
+    ]
     const user = await dbWrapper.getUserByAddress(address)
     if (user) {
-      dbWrapper.runSql(`UPDATE users SET name=? bio=? WHERE address=?`, [newName, newBio, address])
+      const columns = 'name=?, bio=?, orcid=?, google=?, github=?, twitter=?, discord=?'
+      dbWrapper.runSql(`UPDATE users SET ${columns} WHERE address=?`, [...params, address])
+      console.log(`cache-updater: Updated entry for user with address ${address}.`)
     }
     else {
       const columns = '(address, name, bio, orcid, google, github, twitter, discord)'
-      const params = [address, newName, newBio, null, null, null, null, null]
-      dbWrapper.runSql(`INSERT INTO users ${columns} VALUES (?, ?, ?, ?, ?, ?, ?, ?)`, params)
+      dbWrapper.runSql(`INSERT INTO users ${columns} VALUES (?, ?, ?, ?, ?, ?, ?, ?)`, [address, ...params])
+      console.log(`cache-updater: Created entry for user with address ${address}.`)
     }
-    console.log(`WTFBios: User with address ${address} set their name/bio. Database has been updated.`);
-  })
-
-  // Update user name/bio in db when RemoveUserNameAndBio events are emitted
-  wtfBiosWithProvider.on("RemoveUserNameAndBio", async (address) => {
-    console.log(`Event listener heard RemoveUserNameAndBio event for address ${address}`)
-    address = address.toLowerCase()
-    const user = await dbWrapper.getUserByAddress(address)
-    if (user) {
-      dbWrapper.runSql(`UPDATE users SET name=? bio=? WHERE address=?`, [null, null, address])
-    }
-    console.log(`WTFBios: User with address ${address} removed their name/bio. Database has been updated.`);
-  })
+  }
 }
 
 /**
- * Add event listeners to the given VerifyJWT contract.
- * @param {string} service e.g., 'google' or 'orcid'
+ * Retrieve registered addresses from each WTF contract, and for each address, 
+ * retrieve from the blockchain its holo and update the db with the retrieved holo.
  */
-const listenToVerifyJWT = (service) => {
-  console.log(`Listening for events from VerifyJWT (${service})`)
-  const vjwtAddr = vjwtAddresses[service]
-  const vjwtABI = wtf.getContractABIs()['VerifyJWT']
-  const vjwtWithProvider = new ethers.Contract(vjwtAddr, vjwtABI, provider)
-  vjwtWithProvider.on("JWTVerification", async (verified) => {
-    console.log(`Event listener heard JWTVerification event for service ${service}`)
-    const allAddrsInContract = await vjwtWithProvider.getRegisteredAddresses()
-    const allUsersInDb = await dbWrapper.getAllUsers()
-    const allAddrsInDb = allUsersInDb.map(user => user['address'])
-    // newAddrs might be one or more addresses, depending on db latency and frequency of JWTVerification
-    const newAddrs = allAddrsInContract.filter(x => !allAddrsInDb.has(x))
-    for (const address of newAddrs) {
-      address = address.toLowerCase()
-      const newCreds = wtf.credentialsForAddress(address, service)
-      const user = await dbWrapper.getUserByAddress(address)
-      if (user) {
-        dbWrapper.runSql(`UPDATE users SET ${service}=? WHERE address=?`, [newCreds, address])
-      }
-      else {
-        let paramIndex = 3
-        switch (service) {
-          case 'google': 
-            paramIndex = 4;
-            break;
-          case 'github': 
-            paramIndex = 5;
-            break;
-          case 'twitter': 
-            paramIndex = 6;
-            break;
-          case 'discord': 
-            paramIndex = 7;
-            break;
-        }
-        const columns = '(address, name, bio, orcid, google, github, twitter, discord)'
-        const params = [address, null, null, null, null, null, null, null]
-        params[paramIndex] = newCreds
-        dbWrapper.runSql(`INSERT INTO users ${columns} VALUES (?, ?, ?, ?, ?, ?, ?, ?)`, params)
-      }
-      console.log(`listenToVerifyJWT: New ${service} credentials for ${address}: ${newCreds}. Database has been updated.`)
-    }
-    let msg = `VerifyJWT: A user attempted to verify their committed proof. `
-    let successMsg = msg + (verified ? 'Attempt succeeded.' : 'Attempt failed.')
-    console.log(successMsg);
-  })
+const updateUsersInDb = async () => {
+  // Get contracts
+  let contracts = []
+  for (const service of Object.keys(vjwtAddresses)) {
+    const vjwtAddr = vjwtAddresses[service]
+    const vjwtABI = wtf.getContractABIs()['VerifyJWT']
+    const vjwtWithProvider = new ethers.Contract(vjwtAddr, vjwtABI, provider)
+    contracts.push(vjwtWithProvider)
+  }
+  const wtfBiosABI = wtf.getContractABIs()['WTFBios']
+  const wtfBiosWithProvider = new ethers.Contract(wtfBiosAddress, wtfBiosABI, provider)
+  contracts.push(wtfBiosWithProvider)
+
+  // Update db
+  for (const contract of contracts) {
+    await updateDbEntriesForUsersInContract(contract)
+  }
+}
+
+const runUpdater = async () => {
+  const waitTime = 10 * 1000
+  setInterval(async () => {
+    await updateUsersInDb()
+  }, waitTime)
 }
 
 console.log(`cache-updater pid: ${process.pid}`)
 
-if (process.env.WTF_USE_TEST_CONTRACT_ADDRESSES == "true") {
-  Promise.all([
-    listenToWTFBios(),
-    listenToVerifyJWT('orcid'),
-    listenToVerifyJWT('google')
-  ])
-}
-else {
-  Promise.all([
-    listenToWTFBios(),
-    listenToVerifyJWT('orcid'),
-    listenToVerifyJWT('google'),
-    listenToVerifyJWT('github'),
-    listenToVerifyJWT('twitter'),
-    listenToVerifyJWT('discord'),
-  ])
-}
+runUpdater()
