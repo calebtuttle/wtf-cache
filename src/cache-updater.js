@@ -8,18 +8,24 @@ const ethers = require('ethers')
 const { db, wtf } = require('./init')
 const dbWrapper = require('./utils/dbWrapper')
 
+const wtfBiosAddress = process.env.WTF_USE_TEST_CONTRACT_ADDRESSES == "true"
+                       ? wtf.getContractAddresses()['WTFBios']['ethereum']
+                       : wtf.getContractAddresses()['WTFBios']['gnosis']
+const vjwtAddresses = process.env.WTF_USE_TEST_CONTRACT_ADDRESSES == "true"
+                      ? wtf.getContractAddresses()['VerifyJWT']['ethereum']
+                      : wtf.getContractAddresses()['VerifyJWT']['gnosis']
 const provider = new ethers.providers.JsonRpcProvider('https://rpc.gnosischain.com/')
 
 /**
  * Add event listeners to the WTFBios contract.
  */
 const listenToWTFBios = () => {
-  const wtfBiosAddr = wtf.getContractAddresses()['WTFBios']['gnosis']
   const wtfBiosABI = wtf.getContractABIs()['WTFBios']
-  const wtfBiosWithProvider = new ethers.Contract(wtfBiosAddr, wtfBiosABI, provider)
+  const wtfBiosWithProvider = new ethers.Contract(wtfBiosAddress, wtfBiosABI, provider)
 
   // Update user name/bio in db when SetUserNameAndBio events are emitted
   wtfBiosWithProvider.on("SetUserNameAndBio", async (address) => {
+    address = address.toLowerCase()
     const newName = await wtf.nameForAddress(address);
     const newBio = await wtf.bioForAddress(address);
     const user = await dbWrapper.getUserByAddress(address)
@@ -36,6 +42,7 @@ const listenToWTFBios = () => {
 
   // Update user name/bio in db when RemoveUserNameAndBio events are emitted
   wtfBiosWithProvider.on("RemoveUserNameAndBio", async (address) => {
+    address = address.toLowerCase()
     const user = await dbWrapper.getUserByAddress(address)
     if (user) {
       dbWrapper.runSql(`UPDATE users SET name=? bio=? WHERE address=?`, [null, null, address])
@@ -49,7 +56,7 @@ const listenToWTFBios = () => {
  * @param {string} service e.g., 'google' or 'orcid'
  */
 const listenToVerifyJWT = (service) => {
-  const vjwtAddr = wtf.getContractAddresses()['VerifyJWT']['gnosis'][service]
+  const vjwtAddr = vjwtAddresses[service]
   const vjwtABI = wtf.getContractABIs()['VerifyJWT']
   const vjwtWithProvider = new ethers.Contract(vjwtAddr, vjwtABI, provider)
   vjwtWithProvider.on("JWTVerification", async (verified) => {
@@ -59,6 +66,7 @@ const listenToVerifyJWT = (service) => {
     // newAddrs might be one or more addresses, depending on db latency and frequency of JWTVerification
     const newAddrs = allAddrsInContract.filter(x => !allAddrsInDb.has(x))
     for (const address of newAddrs) {
+      address = address.toLowerCase()
       const newCreds = wtf.credentialsForAddress(address, service)
       const user = await dbWrapper.getUserByAddress(address)
       if (user) {
@@ -95,11 +103,20 @@ const listenToVerifyJWT = (service) => {
 
 console.log(`cache-updater pid: ${process.pid}`)
 
-Promise.all([
-  listenToWTFBios(),
-  listenToVerifyJWT('orcid'),
-  listenToVerifyJWT('google'),
-  listenToVerifyJWT('github'),
-  listenToVerifyJWT('twitter'),
-  listenToVerifyJWT('discord'),
-])
+if (process.env.WTF_USE_TEST_CONTRACT_ADDRESSES == "true") {
+  Promise.all([
+    listenToWTFBios(),
+    listenToVerifyJWT('orcid'),
+    listenToVerifyJWT('google')
+  ])
+}
+else {
+  Promise.all([
+    listenToWTFBios(),
+    listenToVerifyJWT('orcid'),
+    listenToVerifyJWT('google'),
+    listenToVerifyJWT('github'),
+    listenToVerifyJWT('twitter'),
+    listenToVerifyJWT('discord'),
+  ])
+}
