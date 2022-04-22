@@ -1,7 +1,7 @@
 #!/bin/bash
 
 shopt -s expand_aliases
-alias run_server='bash ./src/server.sh'
+alias run_server='bash ./src/runServer.sh'
 alias run_hardhat_node='node ./test/utils/runTestNode.js'
 alias run_tests='npx mocha'
 
@@ -11,7 +11,7 @@ run_hardhat_node &
 sleep 5;
 printf '\n';
 run_server &
-sleep 1;
+sleep 2;
 run_tests;
 
 sleep 7

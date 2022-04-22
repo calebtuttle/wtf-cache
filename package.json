@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "bash test/runServerAndTests.sh",
-    "start": "bash src/server.sh"
+    "start": "bash src/runServer.sh"
   },
   "author": "",
   "license": "ISC",

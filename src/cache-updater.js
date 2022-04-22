@@ -14,17 +14,22 @@ const wtfBiosAddress = process.env.WTF_USE_TEST_CONTRACT_ADDRESSES == "true"
 const vjwtAddresses = process.env.WTF_USE_TEST_CONTRACT_ADDRESSES == "true"
                       ? wtf.getContractAddresses()['VerifyJWT']['ethereum']
                       : wtf.getContractAddresses()['VerifyJWT']['gnosis']
+const providerURL = process.env.WTF_USE_TEST_CONTRACT_ADDRESSES == "true"
+                    ? 'https://localhost:8545'
+                    : 'https://rpc.gnosischain.com/'
 const provider = new ethers.providers.JsonRpcProvider('https://rpc.gnosischain.com/')
 
 /**
  * Add event listeners to the WTFBios contract.
  */
 const listenToWTFBios = () => {
+  console.log('Listening for events from WTFBios')
   const wtfBiosABI = wtf.getContractABIs()['WTFBios']
   const wtfBiosWithProvider = new ethers.Contract(wtfBiosAddress, wtfBiosABI, provider)
 
   // Update user name/bio in db when SetUserNameAndBio events are emitted
   wtfBiosWithProvider.on("SetUserNameAndBio", async (address) => {
+    console.log(`Event listener heard event SetUserNameAndBio for address ${address}`)
     address = address.toLowerCase()
     const newName = await wtf.nameForAddress(address);
     const newBio = await wtf.bioForAddress(address);
@@ -42,6 +47,7 @@ const listenToWTFBios = () => {
 
   // Update user name/bio in db when RemoveUserNameAndBio events are emitted
   wtfBiosWithProvider.on("RemoveUserNameAndBio", async (address) => {
+    console.log(`Event listener heard RemoveUserNameAndBio event for address ${address}`)
     address = address.toLowerCase()
     const user = await dbWrapper.getUserByAddress(address)
     if (user) {
@@ -56,10 +62,12 @@ const listenToWTFBios = () => {
  * @param {string} service e.g., 'google' or 'orcid'
  */
 const listenToVerifyJWT = (service) => {
+  console.log(`Listening for events from VerifyJWT (${service})`)
   const vjwtAddr = vjwtAddresses[service]
   const vjwtABI = wtf.getContractABIs()['VerifyJWT']
   const vjwtWithProvider = new ethers.Contract(vjwtAddr, vjwtABI, provider)
   vjwtWithProvider.on("JWTVerification", async (verified) => {
+    console.log(`Event listener heard JWTVerification event for service ${service}`)
     const allAddrsInContract = await vjwtWithProvider.getRegisteredAddresses()
     const allUsersInDb = await dbWrapper.getAllUsers()
     const allAddrsInDb = allUsersInDb.map(user => user['address'])

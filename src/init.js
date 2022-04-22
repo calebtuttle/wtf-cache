@@ -18,7 +18,7 @@ if (process.env.WTF_USE_TEST_CONTRACT_ADDRESSES == "true") {
 }
 else {
   database = new sqlite3.Database(`${__dirname}/../database/wtf.sqlite3`);
-  console.log('Using prod database')
+  console.log('Using production database')
 }
 const db = database;
 process.on('SIGTERM', () => db.close());
