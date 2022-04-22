@@ -177,6 +177,7 @@ async function printAddresses(idAggAddr, wtfBiosAddr, vjwtOrcidAddr, vjwtGoogleA
 
 async function main() {
   // setup
+  await hre.network.provider.send("hardhat_setLoggingEnabled", [false]);
   const provider = new ethers.providers.JsonRpcProvider("http://localhost:8545");
   const privateKey = '0x3a73865117f803f861db17ef7fe3381c0a1a809c11e74fdeac4f72ac5536b0fe';
   const wallet = new ethers.Wallet(privateKey, provider);
