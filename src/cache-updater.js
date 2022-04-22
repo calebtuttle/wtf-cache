@@ -17,7 +17,7 @@ const vjwtAddresses = process.env.WTF_USE_TEST_CONTRACT_ADDRESSES == "true"
 const providerURL = process.env.WTF_USE_TEST_CONTRACT_ADDRESSES == "true"
                     ? 'https://localhost:8545'
                     : 'https://rpc.gnosischain.com/'
-const provider = new ethers.providers.JsonRpcProvider('https://rpc.gnosischain.com/')
+const provider = new ethers.providers.JsonRpcProvider(providerURL)
 
 /**
  * Add event listeners to the WTFBios contract.
