@@ -22,11 +22,13 @@ const getHolo = async (address) => {
       'discord': user['discord']
     }
     console.log('Retrieved holo from cache. Returning it now.')
+    console.log(userHolo)
     return userHolo
   }
   console.log(`No user with address ${address} in cache. Retrieving holo with wtf-lib.`)
   const userHolo = await wtf.getHolo(address)
   console.log(`getHolo: Retrieved holo for ${address} with wtf-lib. Updating db and returning.`)
+  console.log(userHolo)
   const columns = '(address, name, bio, orcid, google, github, twitter, discord)'
   const params = [
     address,
