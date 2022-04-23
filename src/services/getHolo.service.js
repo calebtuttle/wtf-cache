@@ -10,18 +10,16 @@ const getHolo = async (address) => {
   console.log('getHolo: Entered')
   let user = await dbWrapper.getUserByAddress(address)
   if (user) {
-    // Reshape so that it is backwards-compatible / compatible with frontend.
+    // Reshape to include chain/network. This is the shape of the response from wtf-lib.
     let userHolo = {}
     userHolo[chain] = {
       'name': user['name'],
       'bio': user['bio'],
-      'creds': {
-        'orcid': user['orcid'],
-        'google': user['google'],
-        'github': user['github'],
-        'twitter': user['twitter'],
-        'discord': user['discord']
-      }
+      'orcid': user['orcid'],
+      'google': user['google'],
+      'github': user['github'],
+      'twitter': user['twitter'],
+      'discord': user['discord']
     }
     console.log('Retrieved holo from cache. Returning it now.')
     return userHolo
@@ -34,11 +32,11 @@ const getHolo = async (address) => {
     address,
     userHolo[chain]['name'],
     userHolo[chain]['bio'],
-    userHolo[chain]['creds']['orcid'],
-    userHolo[chain]['creds']['google'],
-    userHolo[chain]['creds']['github'],
-    userHolo[chain]['creds']['twitter'],
-    userHolo[chain]['creds']['discord']
+    userHolo[chain]['orcid'],
+    userHolo[chain]['google'],
+    userHolo[chain]['github'],
+    userHolo[chain]['twitter'],
+    userHolo[chain]['discord']
   ]
   dbWrapper.runSql(`INSERT INTO users ${columns} VALUES (?, ?, ?, ?, ?, ?, ?, ?)`, params)
   console.log(`getHolo: Updated database for ${address}. Returning.`)

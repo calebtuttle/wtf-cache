@@ -27,11 +27,11 @@ const updateDbEntriesForUsersInContract = async (contract) => {
     const params = [
       newHolo[chain]['name'],
       newHolo[chain]['bio'],
-      newHolo[chain]['creds']['orcid'],
-      newHolo[chain]['creds']['google'],
-      newHolo[chain]['creds']['github'],
-      newHolo[chain]['creds']['twitter'],
-      newHolo[chain]['creds']['discord']
+      newHolo[chain]['orcid'],
+      newHolo[chain]['google'],
+      newHolo[chain]['github'],
+      newHolo[chain]['twitter'],
+      newHolo[chain]['discord']
     ]
     const user = await dbWrapper.getUserByAddress(address)
     if (user) {

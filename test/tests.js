@@ -34,7 +34,7 @@ describe('cache-server', function () {
       expect(userHolo).to.be.an('object')
       expect(userHolo['ethereum']['name']).to.equal('Greg')
       expect(userHolo['ethereum']['bio']).to.equal('Business person')
-      expect(userHolo['ethereum']['creds']['orcid']).to.equal('0000-0002-2308-9517')
+      expect(userHolo['ethereum']['orcid']).to.equal('0000-0002-2308-9517')
     })
   })
 
