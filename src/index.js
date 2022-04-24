@@ -3,6 +3,7 @@ const cors = require('cors')
 const getAllUserAddresses = require('./routes/getAllUserAddresses')
 const getHolo = require('./routes/getHolo')
 const addressForCredentials = require('./routes/addressForCredentials')
+const searchHolos = require('./routes/searchHolos')
 const init = require('./init')
 
 const app = express()
@@ -18,5 +19,6 @@ app.use(express.urlencoded({extended: true}))
 app.use('/getAllUserAddresses', cors(corsOptions), getAllUserAddresses)
 app.use('/getHolo/', cors(corsOptions), getHolo)
 app.use('/addressForCredentials/', cors(corsOptions), addressForCredentials)
+app.use('/searchHolos/', cors(corsOptions), searchHolos)
 
 module.exports = app
