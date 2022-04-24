@@ -46,6 +46,19 @@ describe('cache-server', function () {
       expect(address.toLowerCase()).to.equal(this.wallet.address.toLowerCase())
     })
   })
+
+  describe('/searchHolos', function () {
+    it('Should return the correct array of holos', async function () {
+      let url = `http://localhost:3000/searchHolos?searchStr=jerry`
+      const response = await axios.get(url)
+      const holos = await response.data
+      expect(holos).to.be.an('array')
+      const userAddrs = holos.map(holo => holo['address'])
+      expect(userAddrs).to.include('0xdbd6b2c02338919edaa192f5b60f5e5840a50079')
+      const userNames = holos.map(holo => holo['name'])
+      expect(userNames).to.include('Jerry')
+    })
+  })
 })
 
 describe('cache-updater', function () {

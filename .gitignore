@@ -1,6 +1,5 @@
 node_modules
-database
 .vscode
 .env
 notes.txt
-*.sqlite3
+wtf.sqlite3
