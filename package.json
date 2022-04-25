@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "bash test/runServerAndTests.sh",
+    "test-local": "bash test/runServerAndTests.sh",
     "start": "bash src/server.sh"
   },
   "author": "",
