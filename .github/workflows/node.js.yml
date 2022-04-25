@@ -33,4 +33,4 @@ jobs:
            sleep 5; 
            node ./src/cache-server.js & 
            node ./src/cache-updater.js & 
-           npm test
+           npx mocha
