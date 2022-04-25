@@ -4,7 +4,8 @@ A simple server-side cache for data stored on WTF Protocol smart contracts. The 
 Endpoints:
 - /getAllUserAddresses
 - /getHolo?address=<crypto_address>
-- /addressForCredentials?credentials=<credentials>&service=<service>
+- /addressForCredentials?credentials=<user_credentials>&service=<service_that_issued_credentials>
+- /searchHolos?searchStr=<search_str>
 
 ## Setup
 Clone this repository.
