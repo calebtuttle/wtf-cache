@@ -27,21 +27,8 @@ const getHolo = async (address) => {
   }
   console.log(`No user with address ${address} in cache. Retrieving holo with wtf-lib.`)
   const userHolo = await wtf.getHolo(address)
-  console.log(`getHolo: Retrieved holo for ${address} with wtf-lib. Updating db and returning.`)
+  console.log(`getHolo: Retrieved holo for ${address} with wtf-lib. Returning.`)
   console.log(userHolo)
-  const columns = '(address, name, bio, orcid, google, github, twitter, discord)'
-  const params = [
-    address,
-    userHolo[chain]['name'],
-    userHolo[chain]['bio'],
-    userHolo[chain]['orcid'],
-    userHolo[chain]['google'],
-    userHolo[chain]['github'],
-    userHolo[chain]['twitter'],
-    userHolo[chain]['discord']
-  ]
-  dbWrapper.runSql(`INSERT INTO users ${columns} VALUES (?, ?, ?, ?, ?, ?, ?, ?)`, params)
-  console.log(`getHolo: Updated database for ${address}. Returning.`)
   return userHolo
 }
 
