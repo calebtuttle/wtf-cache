@@ -1,6 +1,5 @@
 const express = require('express')
-const { db, wtf } = require('../init')
-const dbWrapper = require('../utils/dbWrapper')
+const { redisClient, wtf } = require('../init')
 
 /**
  * Get the crypto address linked to the provided credentials.
@@ -9,14 +8,29 @@ const dbWrapper = require('../utils/dbWrapper')
  */
 const getAddressForCredentials = async (service, credentials) => {
   console.log('getAddressForCredentials: Entered')
-  const user = await dbWrapper.selectUser(service, credentials)
-  if (user) {
-    console.log('getAddressForCredentials: Retrieved address from cache. Returning now.')
-    return user['address']
+  for (const network of wtf.getSupportedNetworks()) {
+    try {
+      const address = await redisClient.json.get(`${network}${service}${credentials}`, {
+        // JSON Path: .node = the element called 'node' at root level.
+        path: '.'
+      });
+      if (address) {
+        console.log('getAddressForCredentials: Retrieved address from cache. Returning now.')
+        return address
+      }
+    }
+    catch (err) {
+      console.log(err)
+    }
   }
   console.log('getAddressForCredentials: No address in cache. Retrieving it with wtf-lib')
-  const address = await wtf.addressForCredentials(credentials, service)
-  return address
+  try {
+    const address = await wtf.addressForCredentials(credentials, service)
+    return address
+  }
+  catch (err) {
+    console.log(err)
+  }
 }
 
 

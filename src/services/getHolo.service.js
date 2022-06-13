@@ -1,6 +1,5 @@
 const express = require('express')
-const { db, wtf } = require('../init')
-const dbWrapper = require('../utils/dbWrapper')
+const { redisClient, wtf } = require('../init')
 
 const chain = process.env.WTF_USE_TEST_CONTRACT_ADDRESSES == "true"
               ? 'ethereum' : 'gnosis'
@@ -8,25 +7,22 @@ const chain = process.env.WTF_USE_TEST_CONTRACT_ADDRESSES == "true"
 const getHolo = async (address) => {
   address = address.toLowerCase()
   console.log('getHolo: Entered')
-  let user = await dbWrapper.getUserByAddress(address)
-  if (user) {
-    // Reshape to include chain/network. This is the shape of the response from wtf-lib.
-    let userHolo = {}
-    userHolo[chain] = {
-      'name': user['name'],
-      'bio': user['bio'],
-      'orcid': user['orcid'],
-      'google': user['google'],
-      'github': user['github'],
-      'twitter': user['twitter'],
-      'discord': user['discord']
+  try {
+    let userHolo = await redisClient.json.get(address, {
+      // JSON Path: .node = the element called 'node' at root level.
+      path: '.'
+    });
+    if (userHolo) {
+      console.log('Retrieved holo from cache. Returning it now.')
+      console.log(userHolo)
+      return userHolo
     }
-    console.log('Retrieved holo from cache. Returning it now.')
-    console.log(userHolo)
-    return userHolo
+  }
+  catch (err) {
+    console.log(err)
   }
   console.log(`No user with address ${address} in cache. Retrieving holo with wtf-lib.`)
-  const userHolo = await wtf.getHolo(address)
+  userHolo = await wtf.getHolo(address)
   console.log(`getHolo: Retrieved holo for ${address} with wtf-lib. Returning.`)
   console.log(userHolo)
   return userHolo
