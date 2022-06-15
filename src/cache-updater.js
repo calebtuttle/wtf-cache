@@ -30,6 +30,7 @@ const updateDbEntriesForUsersInContract = async (contract) => {
 
     try {
       const holo = await wtf.getHolo(address)
+      holo.address = address
 
       // RedisJSON uses JSON Path syntax. '.' is the root of the JSON object.
       await redisClient.json.set(address, '.', holo);
