@@ -7,6 +7,26 @@ Endpoints:
 - /addressForCredentials?credentials=<user_credentials>&service=<service_that_issued_credentials>
 - /searchHolos?searchStr=<search_str>
 
+# getHolo/
+Return shape:
+
+    {
+        address: <address>,
+        <chain_1>: {
+            <service_1>: <credentials_for_service_1_on_chain_1>,
+            <service_2>: <credentials_for_service_2_on_chain_1>,
+            ...
+            <service_i>: <credentials_for_service_i_on_chain_1>
+        },
+        <chain_2>: {
+            <service_1>: <credentials_for_service_1_on_chain_2>,
+            <service_2>: <credentials_for_service_2_on_chain_2>,
+            ...
+            <service_i>: <credentials_for_service_i_on_chain_2>
+        },
+        ...
+    }
+
 ## Setup
 Clone this repository.
 
