@@ -1,5 +1,5 @@
 const express = require('express')
-const { redisClient, wtf } = require('../init')
+const dbWrapper = require('../utils/dbWrapper')
 
 
 /**
@@ -11,29 +11,18 @@ const { redisClient, wtf } = require('../init')
 const searchHolos = async (searchStr) => {
   searchStr = searchStr.toLowerCase()
   console.log('searchHolos: Entered')
-  const allUsers = []
-  try {
-    const addresses = await redisClient.json.get(`addresses`, {path: '.'});
-    for (const addr of addresses) {
-      const holo = await redisClient.json.get(addr, {path: '.'});
-      allUsers.push(holo)
-    }
-  }
-  catch (error) {
-    console.log(error)
-  }
+  const allUsers = await dbWrapper.getAllUsers()
+
   const startTime = performance.now()
   let matchingHolos = []
   for (const user of allUsers) {
-    for (const network of Object.keys(user)) {
-      for (const field of Object.keys(user[network])) {
-        if (!user[network][field]) {
-          continue;
-        }
-        if (user[network][field].toLowerCase().includes(searchStr)) {
-          matchingHolos.push(user)
-          break;
-        }
+    for (const field of Object.keys(user)) {
+      if (!user[field]) {
+        continue;
+      }
+      if (user[field].toLowerCase().includes(searchStr)) {
+        matchingHolos.push(user)
+        break;
       }
     }
   }

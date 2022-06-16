@@ -1,5 +1,5 @@
 const express = require('express')
-const { redisClient, wtf } = require('../init')
+const { redisClient, wtf } = require('../../init')
 
 
 const getAllUserAddrs = async () => {

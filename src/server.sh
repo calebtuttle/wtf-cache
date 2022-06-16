@@ -9,7 +9,8 @@
 
 shopt -s expand_aliases
 alias run_cache_server='node ./src/cache-server.js'
-alias run_cache_updater='node ./src/cache-updater.js'
+alias run_cache_updater_v1='node ./src/api-v1/cache-updater.js'
+alias run_cache_updater_v2='node ./src/api-v2/cache-updater.js'
 
-run_cache_server & run_cache_updater && fg; fg;
+run_cache_server & run_cache_updater_v1 & run_cache_updater_v2 && fg; fg; fg;
 

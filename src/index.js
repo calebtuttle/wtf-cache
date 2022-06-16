@@ -1,9 +1,5 @@
 const express = require('express')
 const cors = require('cors')
-const getAllUserAddresses = require('./routes/getAllUserAddresses')
-const getHolo = require('./routes/getHolo')
-const addressForCredentials = require('./routes/addressForCredentials')
-const searchHolos = require('./routes/searchHolos')
 const init = require('./init')
 
 const app = express()
@@ -16,9 +12,25 @@ var corsOptions = {
 
 app.use(express.json())
 app.use(express.urlencoded({extended: true}))
-app.use('/getAllUserAddresses', cors(corsOptions), getAllUserAddresses)
-app.use('/getHolo/', cors(corsOptions), getHolo)
-app.use('/addressForCredentials/', cors(corsOptions), addressForCredentials)
-app.use('/searchHolos/', cors(corsOptions), searchHolos)
+
+/** API v1 */
+const getAllUserAddresses_v1 = require('./api-v1/routes/getAllUserAddresses')
+const getHolo_v1 = require('./api-v1/routes/getHolo')
+const addressForCredentials_v1 = require('./api-v1/routes/addressForCredentials')
+const searchHolos_v1 = require('./api-v1/routes/searchHolos')
+app.use('/getAllUserAddresses/', cors(corsOptions), getAllUserAddresses_v1)
+app.use('/getHolo/', cors(corsOptions), getHolo_v1)
+app.use('/addressForCredentials/', cors(corsOptions), addressForCredentials_v1)
+app.use('/searchHolos/', cors(corsOptions), searchHolos_v1)
+
+/** API v2 */
+const getAllUserAddresses_v2 = require('./api-v2/routes/getAllUserAddresses')
+const getHolo_v2 = require('./api-v2/routes/getHolo')
+const addressForCredentials_v2 = require('./api-v2/routes/addressForCredentials')
+const searchHolos_v2 = require('./api-v2/routes/searchHolos')
+app.use('/api/getAllUserAddresses/', cors(corsOptions), getAllUserAddresses_v2)
+app.use('/api/getHolo/', cors(corsOptions), getHolo_v2)
+app.use('/api/addressForCredentials/', cors(corsOptions), addressForCredentials_v2)
+app.use('/api/searchHolos/', cors(corsOptions), searchHolos_v2)
 
 module.exports = app

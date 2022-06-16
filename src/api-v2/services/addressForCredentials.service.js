@@ -1,5 +1,5 @@
 const express = require('express')
-const { redisClient, wtf } = require('../init')
+const { redisClient, wtf } = require('../../init')
 
 /**
  * Get the crypto address linked to the provided credentials.
@@ -8,7 +8,8 @@ const { redisClient, wtf } = require('../init')
  */
 const getAddressForCredentials = async (service, credentials) => {
   console.log('getAddressForCredentials: Entered')
-  for (const network of wtf.getSupportedNetworks()) {
+  const supportedNetworks = wtf.getSupportedNetworks()
+  for (const network of supportedNetworks) {
     try {
       const address = await redisClient.json.get(`${network}${service}${credentials}`, {
         // JSON Path: .node = the element called 'node' at root level.

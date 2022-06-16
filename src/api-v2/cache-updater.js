@@ -5,7 +5,7 @@
  */
 
 const ethers = require('ethers')
-const { redisClient, wtf } = require('./init')
+const { redisClient, wtf } = require('../init')
 
 const wtfBiosAddresses = wtf.getContractAddresses()['WTFBios']
 const vjwtAddresses = wtf.getContractAddresses()['VerifyJWT']
