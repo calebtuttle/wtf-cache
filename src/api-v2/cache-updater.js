@@ -41,13 +41,12 @@ const updateDbEntriesForUsersInContract = async (contract) => {
   
       // The following mapping is used for addressForCreds
       for (const network of Object.keys(holo)) {
+        if (network == 'address') continue
         for (const service of Object.keys(holo[network])) {
-          for (const creds of Object.keys(holo[network][service])) {
-            await redisClient.json.set(`${network}${service}${creds}`, '.', address);
-          }
+          const creds = holo[network][service]
+          await redisClient.json.set(`${network}${service}${creds}`, '.', address);
         }
       }
-      console.log(`cache-updater: Updated entry for user with address ${address}.`)
     }
     catch (err) {
       console.log(err)
