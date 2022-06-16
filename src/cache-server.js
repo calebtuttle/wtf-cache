@@ -7,7 +7,7 @@ const app = require('./index')
 
 console.log(`cache-server pid: ${process.pid}`)
 
-const PORT = 3000
+const PORT = 3001
 const server = app.listen(PORT, (err) => {
   if (err) throw err
   console.log(`Server running in http://127.0.0.1:${PORT}`)
