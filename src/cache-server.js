@@ -15,7 +15,9 @@ const server = app.listen(PORT, (err) => {
 
 process.on('SIGTERM', () => server.close(() => {
   console.log(`\nClosed server`)
+  process.exit(0)
 }));
 process.on('SIGINT', () => server.close(() => {
   console.log(`\nClosed server`)
+  process.exit(0)
 }));
