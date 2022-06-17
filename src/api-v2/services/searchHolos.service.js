@@ -40,7 +40,8 @@ const searchHolos = async (searchStr) => {
   }
   const ms = performance.now() - startTime
   console.log(`searchHolos: Found ${matchingHolos.length} matching holos in ${ms} milliseconds.`)
-  return matchingHolos
+  matchingHolos = new Set(matchingHolos)
+  return Array.from(matchingHolos)
 }
 
 module.exports = {
