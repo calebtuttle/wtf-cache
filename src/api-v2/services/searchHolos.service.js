@@ -14,7 +14,7 @@ const searchHolos = async (searchStr) => {
   console.log('searchHolos: Entered')
   const allUsers = []
   try {
-    const addresses = await redisClient.json.get(`addresses`, {path: '.'});
+    const addresses = await redisClient.json.get('addresses', {path: '.'});
     for (const addr of addresses) {
       const holo = await redisClient.json.get(addr, {path: '.'});
       allUsers.push(holo)
