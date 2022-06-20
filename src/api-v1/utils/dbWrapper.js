@@ -1,6 +1,7 @@
 const sqlite3 = require('sqlite3').verbose();
 
 const { db } = require('../../init')
+const { tableNames } = require('../constants')
 
 
 /**
@@ -9,7 +10,10 @@ const { db } = require('../../init')
  */
 module.exports.selectUser = (column, value) => {
   return new Promise((resolve, reject) => {
-    db.get(`SELECT * FROM users WHERE ${column}=?`, value, (err, row) => {
+    const statement = 'SELECT * FROM (SELECT * FROM gnosis UNION SELECT ' +
+                      '* FROM mumbai UNION SELECT * FROM polygon) as User ' +
+                      `WHERE User.${column}=?`
+    db.get(statement, value, (err, row) => {
       if (err) {
         console.log(err)
         reject(err)
@@ -25,16 +29,49 @@ module.exports.getUserByAddress = async (address) => {
 }
 
 /**
+ * Get user with specified address on specified chain.
+ */
+module.exports.getUserByAddressOnChain = (address, chain) => {
+  return new Promise((resolve, reject) => {
+    db.get(`SELECT * FROM ${chain} WHERE address=?`, [address], (err, row) => {
+      if (err) {
+        console.log(err)
+        reject(err)
+      } else {
+        resolve(row)
+      }
+    })
+  })
+}
+
+/**
  * Get all rows in users table.
  */
 module.exports.getAllUsers = () => {
   return new Promise((resolve, reject) => {
-    db.all(`SELECT * FROM users`, [], (err, rows) => {
+    const statement = `SELECT * FROM gnosis UNION SELECT * FROM mumbai UNION SELECT * FROM PolygonUser`
+    db.all(statement, [], (err, rows) => {
       if (err) {
         console.log(err)
         reject(err)
       } else {
         resolve(rows)
+      }
+    })
+  })
+}
+
+module.exports.getAllUserAddresses = () => {
+  return new Promise((resolve, reject) => {
+    const statement = 'SELECT User.address FROM (SELECT * FROM gnosis ' +
+                      'UNION SELECT * FROM mumbai UNION SELECT * FROM ' +
+                      'polygon) as User'
+    db.all(statement, [], (err, rows) => {
+      if (err) {
+        console.log(err)
+        reject(err)
+      } else {
+        resolve(rows.map(row => row.address))
       }
     })
   })

@@ -5,8 +5,7 @@ const dbWrapper = require('../utils/dbWrapper')
 
 const getAllUserAddrs = async () => {
   console.log('getAllUserAddresses: Entered')
-  let allUsers = await dbWrapper.getAllUsers()
-  let allAddrs = allUsers.map(user => user['address'])
+  let allAddrs = await dbWrapper.getAllUserAddresses()
   if (allAddrs.length > 0) {
     console.log('getAllUserAddresses: Retrieved addresses from database. Returning.')
     return allAddrs

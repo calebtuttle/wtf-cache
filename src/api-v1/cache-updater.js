@@ -8,18 +8,23 @@ const ethers = require('ethers')
 const { wtf } = require('../init')
 const dbWrapper = require('./utils/dbWrapper')
 
-const chain = process.env.WTF_USE_TEST_CONTRACT_ADDRESSES == "true" ? 'ethereum' : 'gnosis'
-const wtfBiosAddress = wtf.getContractAddresses()['WTFBios'][chain]
-const vjwtAddresses = wtf.getContractAddresses()['VerifyJWT'][chain]
-const providerURL = process.env.WTF_USE_TEST_CONTRACT_ADDRESSES == "true"
-                    ? 'http://localhost:8545'
-                    : 'https://rpc.gnosischain.com/'
-const provider = new ethers.providers.JsonRpcProvider(providerURL)
+const wtfBiosAddresses = wtf.getContractAddresses()['WTFBios']
+const vjwtAddresses = wtf.getContractAddresses()['VerifyJWT']
+
+const testProviders = {
+  'ethereum': new ethers.providers.JsonRpcProvider('http://localhost:8545')
+}
+const prodProviders = {
+  'gnosis': new ethers.providers.JsonRpcProvider('https://rpc.gnosischain.com/'),
+  'mumbai': new ethers.providers.JsonRpcProvider(process.env.MORALIS_NODE)
+}
+const providers = process.env.WTF_USE_TEST_CONTRACT_ADDRESSES == "true"
+                  ? testProviders : prodProviders
 
 /**
  * @param {ethers.Contract} contract A contract (VerifyJWT or WTFBios) instantiated with a provider.
  */
-const updateDbEntriesForUsersInContract = async (contract) => {
+const updateDbEntriesForUsersInContract = async (contract, chain) => {
   const allAddrsInContract = await contract.getRegisteredAddresses()
   for (let address of allAddrsInContract) {
     address = address.toLowerCase()
@@ -33,15 +38,15 @@ const updateDbEntriesForUsersInContract = async (contract) => {
       newHolo[chain]['twitter'],
       newHolo[chain]['discord']
     ]
-    const user = await dbWrapper.getUserByAddress(address)
+    const user = await dbWrapper.getUserByAddressOnChain(address, chain)
     if (user) {
       const columns = 'name=?, bio=?, orcid=?, google=?, github=?, twitter=?, discord=?'
-      dbWrapper.runSql(`UPDATE users SET ${columns} WHERE address=?`, [...params, address])
+      dbWrapper.runSql(`UPDATE ${chain} SET ${columns} WHERE address=?`, [...params, address])
       console.log(`cache-updater: Updated entry for user with address ${address}.`)
     }
     else {
       const columns = '(address, name, bio, orcid, google, github, twitter, discord)'
-      dbWrapper.runSql(`INSERT INTO users ${columns} VALUES (?, ?, ?, ?, ?, ?, ?, ?)`, [address, ...params])
+      dbWrapper.runSql(`INSERT INTO ${chain} ${columns} VALUES (?, ?, ?, ?, ?, ?, ?, ?)`, [address, ...params])
       console.log(`cache-updater: Created entry for user with address ${address}.`)
     }
   }
@@ -52,21 +57,18 @@ const updateDbEntriesForUsersInContract = async (contract) => {
  * retrieve from the blockchain its holo and update the db with the retrieved holo.
  */
 const updateUsersInDb = async () => {
-  // Get contracts
-  let contracts = []
-  for (const service of Object.keys(vjwtAddresses)) {
-    const vjwtAddr = vjwtAddresses[service]
-    const vjwtABI = wtf.getContractABIs()['VerifyJWT']
-    const vjwtWithProvider = new ethers.Contract(vjwtAddr, vjwtABI, provider)
-    contracts.push(vjwtWithProvider)
-  }
-  const wtfBiosABI = wtf.getContractABIs()['WTFBios']
-  const wtfBiosWithProvider = new ethers.Contract(wtfBiosAddress, wtfBiosABI, provider)
-  contracts.push(wtfBiosWithProvider)
-
-  // Update db
-  for (const contract of contracts) {
-    await updateDbEntriesForUsersInContract(contract)
+  for (const network of Object.keys(vjwtAddresses)) {
+    const provider = providers[network]
+    for (const service of Object.keys(vjwtAddresses[network])) {
+      const vjwtAddr = vjwtAddresses[network][service]
+      const vjwtABI = wtf.getContractABIs()['VerifyJWT']
+      const vjwtWithProvider = new ethers.Contract(vjwtAddr, vjwtABI, provider)
+      await updateDbEntriesForUsersInContract(vjwtWithProvider, network)
+    }
+    const wtfBiosABI = wtf.getContractABIs()['WTFBios']
+    const wtfBiosAddress = wtfBiosAddresses[network]
+    const wtfBiosWithProvider = new ethers.Contract(wtfBiosAddress, wtfBiosABI, provider)
+    await updateDbEntriesForUsersInContract(wtfBiosWithProvider, network)
   }
 }
 

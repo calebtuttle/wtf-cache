@@ -1,5 +1,6 @@
 const express = require('express')
 const dbWrapper = require('../utils/dbWrapper')
+const { tableNames } = require('../constants')
 
 
 /**
@@ -11,18 +12,35 @@ const dbWrapper = require('../utils/dbWrapper')
 const searchHolos = async (searchStr) => {
   searchStr = searchStr.toLowerCase()
   console.log('searchHolos: Entered')
-  const allUsers = await dbWrapper.getAllUsers()
 
   const startTime = performance.now()
-  let matchingHolos = []
-  for (const user of allUsers) {
-    for (const field of Object.keys(user)) {
-      if (!user[field]) {
-        continue;
+
+  const allUsers = []
+  const allAddrs = await dbWrapper.getAllUserAddresses()
+  for (const address of allAddrs) {
+    const userHolo = {}
+    for (const chain of tableNames) {
+      const singleChainHolo = await dbWrapper.getUserByAddressOnChain(address, chain)
+      if (singleChainHolo) {
+        delete singleChainHolo.address
+        userHolo[chain] = singleChainHolo
       }
-      if (user[field].toLowerCase().includes(searchStr)) {
-        matchingHolos.push(user)
-        break;
+    }
+    userHolo.address = address
+    allUsers.push(userHolo)
+  }
+
+  const matchingHolos = []
+  for (const user of allUsers) {
+    for (const chain of Object.keys(user)) {
+      for (const field of Object.keys(user[chain])) {
+        if (!user[chain][field]) {
+          continue;
+        }
+        if (user[chain][field].toLowerCase().includes(searchStr)) {
+          matchingHolos.push(user)
+          break;
+        }
       }
     }
   }

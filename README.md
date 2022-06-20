@@ -8,7 +8,7 @@ Endpoints:
 - /searchHolos?searchStr=<search_str>
 
 # getHolo/
-Return shape:
+Return shape (for api-v2):
 
     {
         address: <address>,
