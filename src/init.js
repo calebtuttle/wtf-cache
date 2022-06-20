@@ -18,7 +18,16 @@ const db = database;
 process.on('SIGTERM', () => db.close());
 db.serialize(() => {
   const columns = '(address TEXT, name TEXT, bio TEXT, orcid TEXT, google TEXT, github TEXT, twitter TEXT, discord TEXT)'
-  db.prepare(`CREATE TABLE IF NOT EXISTS users ${columns}`).run().finalize();
+
+  // Every table here is a user table. The table name is the name of the chain (lower cased) to be compatible with frontend.
+  db.prepare(`CREATE TABLE IF NOT EXISTS gnosis ${columns}`).run().finalize();
+  db.prepare(`CREATE TABLE IF NOT EXISTS polygon ${columns}`).run().finalize();
+  db.prepare(`CREATE TABLE IF NOT EXISTS mumbai ${columns}`).run().finalize();
+  // db.prepare(`CREATE TABLE IF NOT EXISTS EthereumUser ${columns}`).run().finalize();
+  // db.prepare(`CREATE TABLE IF NOT EXISTS KovanUser ${columns}`).run().finalize();
+  // db.prepare(`CREATE TABLE IF NOT EXISTS ArbitrumUser ${columns}`).run().finalize();
+  // db.prepare(`CREATE TABLE IF NOT EXISTS OptimismUser ${columns}`).run().finalize();
+  // db.prepare(`CREATE TABLE IF NOT EXISTS AvalancheUser ${columns}`).run().finalize();
 });
 
 
