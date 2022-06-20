@@ -1,6 +1,7 @@
 const { performance } = require('perf_hooks');
 const express = require('express')
 const { redisClient, wtf } = require('../../init')
+const errorLogger = require('../../utils/errorLogger')
 
 
 /**
@@ -22,6 +23,7 @@ const searchHolos = async (searchStr) => {
   }
   catch (error) {
     console.log(error)
+    errorLogger.logError(error.stack)
   }
   const startTime = performance.now()
   let matchingHolos = []

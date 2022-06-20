@@ -4,8 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test-local": "bash test/runServerAndTests.sh",
-    "start": "bash src/server.sh"
+    "test-local": "bash test/runServerAndTests.sh"
   },
   "author": "",
   "license": "ISC",
@@ -14,9 +13,10 @@
     "dotenv": "^16.0.0",
     "ethers": "^5.6.4",
     "express": "^4.17.3",
+    "moment": "^2.29.3",
     "redis": "^4.1.0",
     "sqlite3": "^5.0.8",
-    "wtf-lib": "^2.0.4"
+    "wtf-lib": "^2.0.5"
   },
   "devDependencies": {
     "axios": "^0.26.1",

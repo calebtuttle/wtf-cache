@@ -35,8 +35,6 @@ else {
 
 const redisClient = createClient();
 redisClient.connect().then(val => console.log('Connected to redis db on port 6379'))
-process.on('SIGTERM', async () => await redisClient.quit());
-process.on('SIGINT', async () => await redisClient.quit());
 
 
 module.exports = {
