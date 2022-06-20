@@ -36,8 +36,13 @@ const updateDbEntriesForUsersInContract = async (contract) => {
       await redisClient.json.set(address, '.', holo);
   
       // The following is used for getAllUserAddresses
-      const addrIndex = await redisClient.json.arrIndex('addresses', '.', address);
-      if (addrIndex === -1) await redisClient.json.arrAppend('addresses', '.', address);
+      const addresses = await redisClient.json.get('addresses', {path: '.'})
+      if (addresses) {
+        const addrIndex = await redisClient.json.arrIndex('addresses', '.', address);
+        if (addrIndex === -1) await redisClient.json.arrAppend('addresses', '.', address);
+      } else {
+        await redisClient.json.set('addresses', '.', [])
+      }
   
       // The following mapping is used for addressForCreds
       for (const network of Object.keys(holo)) {
