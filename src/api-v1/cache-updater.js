@@ -28,7 +28,12 @@ const updateDbEntriesForUsersInContract = async (contract, chain) => {
   const allAddrsInContract = await contract.getRegisteredAddresses()
   for (let address of allAddrsInContract) {
     address = address.toLowerCase()
+    const user = await dbWrapper.getUserByAddressOnChain(address, chain)
     const newHolo = await wtf.getHolo(address)
+    const rpcCallFailed = newHolo?.[chain]?.length == 0
+    if (rpcCallFailed) {
+      continue;
+    }
     const params = [
       newHolo[chain]['name'],
       newHolo[chain]['bio'],
@@ -38,7 +43,6 @@ const updateDbEntriesForUsersInContract = async (contract, chain) => {
       newHolo[chain]['twitter'],
       newHolo[chain]['discord']
     ]
-    const user = await dbWrapper.getUserByAddressOnChain(address, chain)
     if (user) {
       const columns = 'name=?, bio=?, orcid=?, google=?, github=?, twitter=?, discord=?'
       dbWrapper.runSql(`UPDATE ${chain} SET ${columns} WHERE address=?`, [...params, address])
