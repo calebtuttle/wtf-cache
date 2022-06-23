@@ -45,9 +45,9 @@ const searchHolos = async (searchStr) => {
     }
   }
   const ms = performance.now() - startTime
-  matchingHolos = new Set(matchingHolos)
-  console.log(`searchHolos: Found ${matchingHolos.size} matching holos in ${ms} milliseconds.`)
-  return Array.from(matchingHolos)
+  const matchingHolosSet = new Set(matchingHolos)
+  console.log(`searchHolos: Found ${matchingHolosSet.size} matching holos in ${ms} milliseconds.`)
+  return Array.from(matchingHolosSet)
 }
 
 module.exports = {
