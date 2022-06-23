@@ -37,6 +37,9 @@ const searchHolos = async (searchStr) => {
         if (!user[chain][field]) {
           continue;
         }
+        if (matchingHolos.map(holo => holo.address).includes(user.address)) {
+          continue;
+        }
         if (user[chain][field].toLowerCase().includes(searchStr)) {
           matchingHolos.push(user)
           break;
@@ -45,9 +48,8 @@ const searchHolos = async (searchStr) => {
     }
   }
   const ms = performance.now() - startTime
-  const matchingHolosSet = new Set(matchingHolos)
-  console.log(`searchHolos: Found ${matchingHolosSet.size} matching holos in ${ms} milliseconds.`)
-  return Array.from(matchingHolosSet)
+  console.log(`searchHolos: Found ${matchingHolos.length} matching holos in ${ms} milliseconds.`)
+  return matchingHolos
 }
 
 module.exports = {
