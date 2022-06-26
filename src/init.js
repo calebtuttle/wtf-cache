@@ -43,12 +43,12 @@ else {
   })
 }
 
-const redisClient = createClient();
-redisClient.connect().then(val => console.log('Connected to redis db on port 6379'))
+// const redisClient = createClient();
+// redisClient.connect().then(val => console.log('Connected to redis db on port 6379'))
 
 
 module.exports = {
   db: db, // v1 db
-  redisClient: redisClient, // v2 db
+  // redisClient: redisClient, // v2 db
   wtf: wtf,
 }
