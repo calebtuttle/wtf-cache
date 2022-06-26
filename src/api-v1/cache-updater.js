@@ -31,7 +31,8 @@ const updateDbEntriesForUsersInContract = async (contract, chain) => {
     address = address.toLowerCase()
     const user = await dbWrapper.getUserByAddressOnChain(address, chain)
     const newHolo = await wtf.getHolo(address)
-    const rpcCallFailed = newHolo?.[chain]?.length == 0
+    const chainIsInResp = !!newHolo?.[chain]
+    const rpcCallFailed = chainIsInResp ? Object.keys(newHolo[chain]).length == 0 : false
     if (rpcCallFailed) {
       continue;
     }
