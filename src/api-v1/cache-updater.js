@@ -16,6 +16,7 @@ const testProviders = {
 }
 const prodProviders = {
   'gnosis': new ethers.providers.JsonRpcProvider('https://rpc.gnosischain.com/'),
+  'polygon': new ethers.providers.JsonRpcProvider('https://polygon-rpc.com/'),
   'mumbai': new ethers.providers.JsonRpcProvider(process.env.MORALIS_NODE)
 }
 const providers = process.env.WTF_USE_TEST_CONTRACT_ADDRESSES == "true"
