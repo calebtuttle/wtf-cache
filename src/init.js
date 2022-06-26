@@ -38,7 +38,7 @@ if (process.env.WTF_USE_TEST_CONTRACT_ADDRESSES == "true") {
 else {
   wtf.setProviderURL({ 
     'gnosis' : 'https://rpc.gnosischain.com/',
-    'polygon' : process.env.MORALIS_NODE,
+    'polygon' : 'https://polygon-rpc.com/',
     'mumbai' : process.env.MORALIS_NODE,
   })
 }
