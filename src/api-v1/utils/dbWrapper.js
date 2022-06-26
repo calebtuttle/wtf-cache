@@ -49,7 +49,7 @@ module.exports.getUserByAddressOnChain = (address, chain) => {
  */
 module.exports.getAllUsers = () => {
   return new Promise((resolve, reject) => {
-    const statement = `SELECT * FROM gnosis UNION SELECT * FROM mumbai UNION SELECT * FROM PolygonUser`
+    const statement = `SELECT * FROM gnosis UNION SELECT * FROM mumbai UNION SELECT * FROM polygon`
     db.all(statement, [], (err, rows) => {
       if (err) {
         console.log(err)
