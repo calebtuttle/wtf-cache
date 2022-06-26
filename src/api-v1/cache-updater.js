@@ -34,6 +34,7 @@ const updateDbEntriesForUsersInContract = async (contract, chain) => {
     const chainIsInResp = !!newHolo?.[chain]
     const rpcCallFailed = chainIsInResp ? Object.keys(newHolo[chain]).length == 0 : false
     if (rpcCallFailed) {
+      console.log(`RPC call to ${chain} failed for user ${address}`)
       continue;
     }
     const params = [
@@ -48,12 +49,10 @@ const updateDbEntriesForUsersInContract = async (contract, chain) => {
     if (user) {
       const columns = 'name=?, bio=?, orcid=?, google=?, github=?, twitter=?, discord=?'
       dbWrapper.runSql(`UPDATE ${chain} SET ${columns} WHERE address=?`, [...params, address])
-      console.log(`cache-updater: Updated entry for user with address ${address}.`)
     }
     else {
       const columns = '(address, name, bio, orcid, google, github, twitter, discord)'
       dbWrapper.runSql(`INSERT INTO ${chain} ${columns} VALUES (?, ?, ?, ?, ?, ?, ?, ?)`, [address, ...params])
-      console.log(`cache-updater: Created entry for user with address ${address}.`)
     }
   }
 }
