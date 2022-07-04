@@ -1,5 +1,5 @@
 # WTF-Cache
-A simple server-side cache for data stored on WTF Protocol smart contracts. The data in this cache is exposed via API endpoints.
+A simple server-side cache for data stored on WTF Protocol smart contracts. The data in this cache is exposed via the following API endpoints.
 
 Endpoints:
 - /api/getAllUserAddresses
