@@ -79,7 +79,7 @@ const updateUsersInDb = async () => {
 }
 
 const runUpdater = async () => {
-  const waitTime = 10 * 1000
+  const waitTime = 20 * 1000
   setInterval(async () => {
     await updateUsersInDb()
   }, waitTime)
