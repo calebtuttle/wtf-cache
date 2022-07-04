@@ -1,6 +1,6 @@
 const sqlite3 = require('sqlite3').verbose();
 
-const { db } = require('../../init')
+const { db } = require('../init')
 const { tableNames } = require('../constants')
 
 

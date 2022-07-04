@@ -5,7 +5,8 @@
  */
 
 const ethers = require('ethers')
-const { redisClient, wtf } = require('../init')
+const { wtf } = require('./init')
+const dbWrapper = require('./utils/dbWrapper')
 
 const wtfBiosAddresses = wtf.getContractAddresses()['WTFBios']
 const vjwtAddresses = wtf.getContractAddresses()['VerifyJWT']
@@ -15,6 +16,7 @@ const testProviders = {
 }
 const prodProviders = {
   'gnosis': new ethers.providers.JsonRpcProvider('https://rpc.gnosischain.com/'),
+  'polygon': new ethers.providers.JsonRpcProvider('https://polygon-rpc.com/'),
   'mumbai': new ethers.providers.JsonRpcProvider(process.env.MORALIS_NODE)
 }
 const providers = process.env.WTF_USE_TEST_CONTRACT_ADDRESSES == "true"
@@ -23,39 +25,34 @@ const providers = process.env.WTF_USE_TEST_CONTRACT_ADDRESSES == "true"
 /**
  * @param {ethers.Contract} contract A contract (VerifyJWT or WTFBios) instantiated with a provider.
  */
-const updateDbEntriesForUsersInContract = async (contract) => {
+const updateDbEntriesForUsersInContract = async (contract, chain) => {
   const allAddrsInContract = await contract.getRegisteredAddresses()
   for (let address of allAddrsInContract) {
     address = address.toLowerCase()
-
-    try {
-      const holo = await wtf.getHolo(address)
-      holo.address = address
-
-      // RedisJSON uses JSON Path syntax. '.' is the root of the JSON object.
-      await redisClient.json.set(address, '.', holo);
-  
-      // The following is used for getAllUserAddresses
-      const addresses = await redisClient.json.get('addresses', {path: '.'})
-      if (addresses) {
-        const addrIndex = await redisClient.json.arrIndex('addresses', '.', address);
-        if (addrIndex === -1) await redisClient.json.arrAppend('addresses', '.', address);
-      } else {
-        await redisClient.json.set('addresses', '.', [])
-      }
-  
-      // The following mapping is used for addressForCreds
-      for (const network of Object.keys(holo)) {
-        if (network == 'address') continue
-        for (const service of Object.keys(holo[network])) {
-          const creds = holo[network][service]
-          await redisClient.json.set(`${network}${service}${creds}`, '.', address);
-        }
-      }
+    const user = await dbWrapper.getUserByAddressOnChain(address, chain)
+    const newHolo = await wtf.getHolo(address)
+    const chainIsInResp = !!newHolo?.[chain]
+    const rpcCallFailed = chainIsInResp ? Object.keys(newHolo[chain]).length == 0 : false
+    if (rpcCallFailed) {
+      console.log(`RPC call to ${chain} failed for user ${address}`)
+      continue;
     }
-    catch (err) {
-      console.log(err)
-      console.log(`cache-updater: Encountered error trying to update entry for user with address ${address}`)
+    const params = [
+      newHolo[chain]['name'],
+      newHolo[chain]['bio'],
+      newHolo[chain]['orcid'],
+      newHolo[chain]['google'],
+      newHolo[chain]['github'],
+      newHolo[chain]['twitter'],
+      newHolo[chain]['discord']
+    ]
+    if (user) {
+      const columns = 'name=?, bio=?, orcid=?, google=?, github=?, twitter=?, discord=?'
+      dbWrapper.runSql(`UPDATE ${chain} SET ${columns} WHERE address=?`, [...params, address])
+    }
+    else {
+      const columns = '(address, name, bio, orcid, google, github, twitter, discord)'
+      dbWrapper.runSql(`INSERT INTO ${chain} ${columns} VALUES (?, ?, ?, ?, ?, ?, ?, ?)`, [address, ...params])
     }
   }
 }
@@ -65,25 +62,18 @@ const updateDbEntriesForUsersInContract = async (contract) => {
  * retrieve from the blockchain its holo and update the db with the retrieved holo.
  */
 const updateUsersInDb = async () => {
-  // Get contracts
-  let contracts = []
   for (const network of Object.keys(vjwtAddresses)) {
     const provider = providers[network]
     for (const service of Object.keys(vjwtAddresses[network])) {
       const vjwtAddr = vjwtAddresses[network][service]
       const vjwtABI = wtf.getContractABIs()['VerifyJWT']
       const vjwtWithProvider = new ethers.Contract(vjwtAddr, vjwtABI, provider)
-      contracts.push(vjwtWithProvider)
+      await updateDbEntriesForUsersInContract(vjwtWithProvider, network)
     }
-    const wtfBiosAddr = wtfBiosAddresses[network]
     const wtfBiosABI = wtf.getContractABIs()['WTFBios']
-    const wtfBiosWithProvider = new ethers.Contract(wtfBiosAddr, wtfBiosABI, provider)
-    contracts.push(wtfBiosWithProvider)
-  }
-
-  // Update db
-  for (const contract of contracts) {
-    await updateDbEntriesForUsersInContract(contract)
+    const wtfBiosAddress = wtfBiosAddresses[network]
+    const wtfBiosWithProvider = new ethers.Contract(wtfBiosAddress, wtfBiosABI, provider)
+    await updateDbEntriesForUsersInContract(wtfBiosWithProvider, network)
   }
 }
 

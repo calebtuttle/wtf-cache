@@ -1,10 +1,8 @@
-const { createClient } = require('redis');
 const sqlite3 = require('sqlite3').verbose();
 const wtf = require('wtf-lib')
 require('dotenv').config();
 
 
-/** API v1 */
 let database = null
 if (process.env.WTF_USE_TEST_CONTRACT_ADDRESSES == "true") {
   database = new sqlite3.Database(`${__dirname}/../database/testdb.sqlite3`);
@@ -31,24 +29,7 @@ db.serialize(() => {
 });
 
 
-/** API v2 */
-if (process.env.WTF_USE_TEST_CONTRACT_ADDRESSES == "true") {
-  wtf.setProviderURL({ 'default' : 'http://localhost:8545'})
-}
-else {
-  wtf.setProviderURL({ 
-    'gnosis' : 'https://rpc.gnosischain.com/',
-    'polygon' : 'https://polygon-rpc.com/',
-    'mumbai' : process.env.MORALIS_NODE,
-  })
-}
-
-// const redisClient = createClient();
-// redisClient.connect().then(val => console.log('Connected to redis db on port 6379'))
-
-
 module.exports = {
-  db: db, // v1 db
-  // redisClient: redisClient, // v2 db
+  db: db,
   wtf: wtf,
 }

@@ -1,5 +1,5 @@
 const express = require('express')
-const { wtf } = require('../../init')
+const { wtf } = require('../init')
 const dbWrapper = require('../utils/dbWrapper')
 const { tableNames } = require('../constants')
 

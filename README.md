@@ -2,35 +2,16 @@
 A simple server-side cache for data stored on WTF Protocol smart contracts. The data in this cache is exposed via API endpoints.
 
 Endpoints:
-- /getAllUserAddresses
-- /getHolo?address=<crypto_address>
-- /addressForCredentials?credentials=<user_credentials>&service=<service_that_issued_credentials>
-- /searchHolos?searchStr=<search_str>
+- /api/getAllUserAddresses
+- /api/getHolo?address=<crypto_address>
+- /api/addressForCredentials?credentials=<user_credentials>&service=<service_that_issued_credentials>
+- /api/searchHolos?searchStr=<search_str>
 
-# getHolo/
-Return shape (for api-v2):
-
-    {
-        address: <address>,
-        <chain_1>: {
-            <service_1>: <credentials_for_service_1_on_chain_1>,
-            <service_2>: <credentials_for_service_2_on_chain_1>,
-            ...
-            <service_i>: <credentials_for_service_i_on_chain_1>
-        },
-        <chain_2>: {
-            <service_1>: <credentials_for_service_1_on_chain_2>,
-            <service_2>: <credentials_for_service_2_on_chain_2>,
-            ...
-            <service_i>: <credentials_for_service_i_on_chain_2>
-        },
-        ...
-    }
 
 ## Setup
 Clone this repository.
 
-    git clone https://github.com/calebtuttle/wtf-cache.git
+    git clone https://github.com/opscientia/wtf-cache.git
     
 Change directory into wtf-api.
 
@@ -44,6 +25,10 @@ Install dependencies.
 
     npm install
 
-Start server on http://localhost:3000
+Start server on http://localhost:3001
 
-    npm run start
+    node src/cache-server.js
+
+Start cache-updater (which, at regular intervals, retrieves on-chain data and updates the database)
+
+    node src/cache-updater.js
