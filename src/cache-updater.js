@@ -3,7 +3,7 @@
  * contracts at regular intervals and updates the local database 
  * with the up-to-date user holos.
  */
-
+const { EventEmitter } = require('events');
 const ethers = require('ethers')
 const { wtf } = require('./init')
 const dbWrapper = require('./utils/dbWrapper')
@@ -79,9 +79,11 @@ const updateUsersInDb = async () => {
 }
 
 const runUpdater = async () => {
+  const eventEmitter = new EventEmitter();
+  eventEmitter.on('newInterval', async () => await updateUsersInDb())
   const waitTime = 20 * 1000
-  setInterval(async () => {
-    await updateUsersInDb()
+  setInterval(() => {
+    eventEmitter.emit('newInterval')
   }, waitTime)
 }
 
