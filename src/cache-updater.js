@@ -49,11 +49,11 @@ const updateDbEntriesForUsersInContract = async (contract, chain) => {
     ]
     if (user) {
       const columns = 'name=?, bio=?, orcid=?, google=?, github=?, twitter=?, discord=?'
-      dbWrapper.runSql(`UPDATE ${chain} SET ${columns} WHERE address=?`, [...params, address])
+      await dbWrapper.runSql(`UPDATE ${chain} SET ${columns} WHERE address=?`, [...params, address])
     }
     else {
       const columns = '(address, name, bio, orcid, google, github, twitter, discord)'
-      dbWrapper.runSql(`INSERT INTO ${chain} ${columns} VALUES (?, ?, ?, ?, ?, ?, ?, ?)`, [address, ...params])
+      await dbWrapper.runSql(`INSERT INTO ${chain} ${columns} VALUES (?, ?, ?, ?, ?, ?, ?, ?)`, [address, ...params])
     }
   }
 }

@@ -88,6 +88,7 @@ module.exports.runSql = (sql, params) => {
         console.log(err)
         reject(err)
       }
+      resolve()
     })
   })
 }
