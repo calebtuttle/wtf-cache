@@ -78,13 +78,16 @@ const updateUsersInDb = async () => {
   }
 }
 
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 const runUpdater = async () => {
-  const eventEmitter = new EventEmitter();
-  eventEmitter.on('newInterval', async () => await updateUsersInDb())
   const waitTime = 20 * 1000
-  setInterval(() => {
-    eventEmitter.emit('newInterval')
-  }, waitTime)
+  while (true) {
+    await updateUsersInDb()
+    await sleep(waitTime)
+  }
 }
 
 console.log(`cache-updater pid: ${process.pid}`)
