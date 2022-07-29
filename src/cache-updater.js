@@ -15,7 +15,7 @@ const testProviders = {
   'ethereum': new ethers.providers.JsonRpcProvider('http://localhost:8545')
 }
 const prodProviders = {
-  'gnosis': new ethers.providers.JsonRpcProvider('https://rpc.gnosischain.com/'),
+  'gnosis': new ethers.providers.JsonRpcProvider(process.env.ANKR_GNOSIS_ENDPOINT),
   'polygon': new ethers.providers.JsonRpcProvider('https://polygon-rpc.com/'),
   // 'mumbai': new ethers.providers.JsonRpcProvider('https://rpc-mumbai.matic.today/')
   'mumbai': new ethers.providers.JsonRpcProvider(process.env.ALCHEMY_MUMBAI_ENDPOINT)

@@ -2,6 +2,10 @@ const sqlite3 = require('sqlite3').verbose();
 const wtf = require('wtf-lib')
 require('dotenv').config();
 
+wtf.setProviderURL({
+  'gnosis': process.env.ANKR_GNOSIS_ENDPOINT,
+  'mumbai': process.env.ALCHEMY_MUMBAI_ENDPOINT
+})
 
 let database = null
 if (process.env.WTF_USE_TEST_CONTRACT_ADDRESSES == "true") {
