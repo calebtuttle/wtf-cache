@@ -4,8 +4,11 @@ const dbWrapper = require('../utils/dbWrapper')
 const { tableNames } = require('../constants')
 
 const getHolo = async (address) => {
-  address = address.toLowerCase()
   console.log('getHolo: Entered')
+  if (!address || address.length != 42 || !address.startsWith('0x')) {
+    return {}
+  }
+  address = address.toLowerCase()
   const holo = {}
   for (const chain of tableNames) {
     holo[chain] = await dbWrapper.getUserByAddressOnChain(address, chain)
