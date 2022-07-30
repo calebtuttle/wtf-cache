@@ -3,8 +3,8 @@
  * contracts at regular intervals and updates the local database 
  * with the up-to-date user holos.
  */
-const { EventEmitter } = require('events');
 const ethers = require('ethers')
+const sanitizeHtml = require('sanitize-html')
 const { wtf } = require('./init')
 const dbWrapper = require('./utils/dbWrapper')
 
@@ -39,13 +39,14 @@ const updateDbEntriesForUsersInContract = async (contract, chain) => {
       continue;
     }
     const params = [
-      newHolo[chain]['name'],
-      newHolo[chain]['bio'],
-      newHolo[chain]['orcid'],
-      newHolo[chain]['google'],
-      newHolo[chain]['github'],
-      newHolo[chain]['twitter'],
-      newHolo[chain]['discord']
+      // Sanitize html in case user stored malicious code in their credentials
+      sanitizeHtml(newHolo[chain]['name']),
+      sanitizeHtml(newHolo[chain]['bio']),
+      sanitizeHtml(newHolo[chain]['orcid']),
+      sanitizeHtml(newHolo[chain]['google']),
+      sanitizeHtml(newHolo[chain]['github']),
+      sanitizeHtml(newHolo[chain]['twitter']),
+      sanitizeHtml(newHolo[chain]['discord'])
     ]
     if (user) {
       const columns = 'name=?, bio=?, orcid=?, google=?, github=?, twitter=?, discord=?'
