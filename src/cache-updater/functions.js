@@ -11,9 +11,9 @@ const testProviders = {
 }
 const prodProviders = {
   'gnosis': new ethers.providers.JsonRpcProvider(process.env.ANKR_GNOSIS_ENDPOINT),
-  'polygon': new ethers.providers.JsonRpcProvider('https://polygon-rpc.com/'),
+  // 'polygon': new ethers.providers.JsonRpcProvider('https://polygon-rpc.com/'),
   // 'mumbai': new ethers.providers.JsonRpcProvider('https://rpc-mumbai.matic.today/')
-  'mumbai': new ethers.providers.JsonRpcProvider(process.env.ALCHEMY_MUMBAI_ENDPOINT)
+  'mumbai': new ethers.providers.JsonRpcProvider(process.env.ANKR_MUMBAI_ENDPOINT)
 }
 const providers = process.env.WTF_USE_TEST_CONTRACT_ADDRESSES == "true"
                   ? testProviders : prodProviders
