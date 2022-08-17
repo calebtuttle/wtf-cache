@@ -18,9 +18,11 @@ const getAllUserAddresses_v1 = require('./routes/getAllUserAddresses')
 const getHolo_v1 = require('./routes/getHolo')
 const addressForCredentials_v1 = require('./routes/addressForCredentials')
 const searchHolos_v1 = require('./routes/searchHolos')
+const updateDatabase = require('./routes/updateDatabase')
 app.use('/api/getAllUserAddresses/', getAllUserAddresses_v1)
 app.use('/api/getHolo/', getHolo_v1)
 app.use('/api/addressForCredentials/', addressForCredentials_v1)
 app.use('/api/searchHolos/', searchHolos_v1)
+app.use('/api/updateDatabase/', updateDatabase)
 
 module.exports = app

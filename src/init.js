@@ -1,5 +1,6 @@
 const sqlite3 = require('sqlite3').verbose();
 const wtf = require('wtf-lib')
+const NodeCache = require( "node-cache" );
 require('dotenv').config();
 
 wtf.setProviderURL({
@@ -32,8 +33,11 @@ db.serialize(() => {
   // db.prepare(`CREATE TABLE IF NOT EXISTS AvalancheUser ${columns}`).run().finalize();
 });
 
+const cache = new NodeCache({ stdTTL: 20, checkperiod: 10 });
+
 
 module.exports = {
   db: db,
+  cache: cache,
   wtf: wtf,
 }
